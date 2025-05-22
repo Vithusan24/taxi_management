@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Taxi Dashboard – Reports</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    /* Reset & Base Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f6f9;
+      color: #333;
+      line-height: 1.6;
+    }
+    
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+    
+    /* Dashboard Layout */
+    .dashboard {
+      display: flex;
+      min-height: 100vh;
+      position: relative;
+    }
+    
+    /* Sidebar Styles */
+    .sidebar {
+      width: 240px;
+      background: #08090b;
+      color: #ecf0f1;
+      padding: 20px 0;
+      transition: all 0.3s ease;
+      position: fixed;
+      height: 100vh;
+      z-index: 100;
+    }
+    
+    .sidebar-header {
+      padding: 0 20px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .sidebar h2 {
+      font-size: 22px;
+      margin-bottom: 5px;
+    }
+    
+    .sidebar-menu {
+      padding: 20px;
+    }
+    
+    .sidebar ul {
+      list-style: none;
+    }
+    
+    .sidebar ul li {
+      margin: 12px 0;
+      position: relative;
+    }
+    
+    .sidebar ul li a {
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      border-radius: 5px;
+      transition: all 0.3s;
+    }
+    
+    .sidebar ul li a:hover,
+    .sidebar ul li a.active {
+      background: rgba(26, 188, 156, 0.2);
+      color: #1abc9c;
+    }
+    
+    .sidebar ul li a i {
+      margin-right: 10px;
+      width: 20px;
+      text-align: center;
+    }
+    
+    .submenu {
+      display: none;
+      padding-left: 20px;
+      margin-top: 5px;
+    }
+    
+    .sidebar ul li.active .submenu {
+      display: block;
+    }
+    
+    .submenu li {
+      margin: 8px 0;
+    }
+    
+    .submenu li a {
+      padding: 8px 10px;
+      font-size: 0.9em;
+    }
+    
+    /* Main Content Area */
+    .main-content {
+      flex: 1;
+      margin-left: 240px;
+      transition: all 0.3s ease;
+    }
+    
+    /* Top Navigation */
+    .topbar {
+      background: #ffffff;
+      padding: 15px 25px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    
+    .topbar-left {
+      display: flex;
+      align-items: center;
+    }
+    
+    .toggle-btn {
+      font-size: 22px;
+      cursor: pointer;
+      margin-right: 20px;
+      color: #555;
+    }
+    
+    .user-actions {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    
+    .notification-bell {
+      position: relative;
+      cursor: pointer;
+    }
+    
+    .notification-badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: #e74c3c;
+      color: white;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+    }
+    
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      position: relative;
+    }
+    
+    .user-avatar {
+      width: 35px;
+      height: 35px;
+      background: #1abc9c;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      overflow: hidden;
+    }
+    
+    .user-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .profile-dropdown {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: white;
+      border-radius: 5px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      width: 200px;
+      padding: 10px 0;
+      display: none;
+      z-index: 100;
+    }
+    
+    .profile-dropdown.active {
+      display: block;
+    }
+    
+    .profile-dropdown a {
+      display: block;
+      padding: 10px 15px;
+      color: #333;
+      transition: all 0.3s;
+    }
+    
+    .profile-dropdown a:hover {
+      background: #f4f6f9;
+    }
+    
+    /* Content Container */
+    .content-container {
+      padding: 25px;
+    }
+    
+    .page-header {
+      margin-bottom: 25px;
+    }
+    
+    .page-header h1 {
+      font-size: 24px;
+      color: #2c3e50;
+    }
+    
+    /* Report Sections */
+    .report-section {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    
+    .report-section h3 {
+      margin-bottom: 15px;
+      color: #2c3e50;
+    }
+    
+    /* Profile Update Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .modal-content {
+      background: white;
+      border-radius: 8px;
+      width: 100%;
+      max-width: 500px;
+      padding: 25px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .modal-header h3 {
+      font-size: 20px;
+      color: #2c3e50;
+    }
+    
+    .close-btn {
+      font-size: 22px;
+      cursor: pointer;
+      color: #7f8c8d;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+    
+    .profile-picture-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .profile-picture {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      overflow: hidden;
+      margin-bottom: 15px;
+      border: 3px solid #eee;
+    }
+    
+    .profile-picture img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+    }
+    
+    .file-input-btn {
+      padding: 8px 15px;
+      background: #1abc9c;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .file-input-btn:hover {
+      background: #16a085;
+    }
+    
+    .file-input {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+    
+    .submit-btn {
+      background: #1abc9c;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s;
+    }
+    
+    .submit-btn:hover {
+      background: #16a085;
+    }
+    
+    /* Responsive Styles */
+    @media (max-width: 992px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      
+      .sidebar.active {
+        transform: translateX(0);
+      }
+      
+      .main-content {
+        margin-left: 0;
+      }
+      
+      .main-content.sidebar-active {
+        margin-left: 240px;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .user-profile span {
+        display: none;
+      }
+      
+      .profile-dropdown {
+        right: -50px;
+      }
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+<div class="dashboard">
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2>Taxi Driver</h2>
+    </div>
+    
+    <nav class="sidebar-menu">
+      <ul>
+        <li>
+          <a href="dash.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        </li>
+        
+        <li>
+          <a href="driver.html"><i class="fas fa-user-tie"></i> Driver Management</a>
+          <ul class="submenu">
+            <li><a href="#">Add Driver</a></li>
+            <li><a href="#">Driver List</a></li>
+            <li><a href="#">Driver History</a></li>
+          </ul>
+        </li>
+        
+        <li>
+          <a href="agency.html"><i class="fas fa-building"></i> Agency Management</a>
+          <ul class="submenu">
+            <li><a href="#">Add Agency</a></li>
+            <li><a href="#">Agency List</a></li>
+            <li><a href="#">Agency History</a></li>
+          </ul>
+        </li>
+        
+        <li>
+          <a href="order.html"><i class="fas fa-car"></i> Order Management</a>
+          <ul class="submenu">
+            <li><a href="#">New Order</a></li>
+            <li><a href="#">Active Orders</a></li>
+            <li><a href="#">Order History</a></li>
+          </ul>
+        </li>
+        
+        <li>
+          <a href="pay.html"><i class="fas fa-credit-card"></i> Payments</a>
+          <ul class="submenu">
+            <li><a href="#">Driver Payments</a></li>
+            <li><a href="#">Agency Payments</a></li>
+            <li><a href="#">Payment History</a></li>
+          </ul>
+        </li>
+        
+        <li class="active">
+          <a href="reo.html"><i class="fas fa-chart-line"></i> Reports</a>
+        </li>
+        
+        <li>
+          <a href="set.html"><i class="fas fa-cog"></i> Settings</a>
+        </li>
+        
+        <li>
+          <a href="login.html"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="main-content" id="main-content">
+    <!-- Top Navigation Bar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="toggle-btn" id="toggle-btn">
+          <i class="fas fa-bars"></i>
+        </button>
+        <h1>Reports</h1>
+      </div>
+      
+      <div class="user-actions">
+        <div class="notification-bell">
+          <i class="fas fa-bell"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        
+        <div class="user-profile" id="user-profile">
+          <div class="user-avatar">
+            <img src="" alt="Profile" id="profile-img">
+          </div>
+          <span>Vithu San</span>
+          <div class="profile-dropdown" id="profile-dropdown">
+            <a href="#" id="update-profile-btn">Update Profile</a>
+            <a href="#">Settings</a>
+            <a href="#">Logout</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Content Container -->
+    <div class="content-container">
+      <!-- Report Sections -->
+      <div class="report-section">
+        <h3>Monthly Earnings</h3>
+        <p>This section will show graphs and earnings reports by month. (Coming soon...)</p>
+      </div>
+      
+      <div class="report-section">
+        <h3>Driver Performance</h3>
+        <p>Overview of driver activity, ratings, and completed orders. (Coming soon...)</p>
+      </div>
+      
+      <div class="report-section">
+        <h3>Vehicle Utilization</h3>
+        <p>Statistics on vehicle usage and efficiency metrics. (Coming soon...)</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Profile Update Modal -->
+<div class="modal" id="profile-modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Update Profile</h3>
+      <span class="close-btn" id="close-modal">&times;</span>
+    </div>
+    
+    <form id="profile-form">
+      <div class="profile-picture-container">
+        <div class="profile-picture">
+          <img src="" alt="Profile" id="modal-profile-img">
+        </div>
+        <div class="file-input-wrapper">
+          <button type="button" class="file-input-btn">Choose Photo</button>
+          <input type="file" id="profile-photo" class="file-input" accept="image/*">
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="full-name">Full Name</label>
+        <input type="text" id="full-name" class="form-control" value="Vithu San">
+      </div>
+      
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" class="form-control" value="vithu@example.com">
+      </div>
+      
+      <div class="form-group">
+        <label for="phone">Phone</label>
+        <input type="tel" id="phone" class="form-control" value="+94 77 123 4567">
+      </div>
+      
+      <button type="submit" class="submit-btn">Save Changes</button>
+    </form>
+  </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // DOM Elements
+    const toggleBtn = document.getElementById('toggle-btn');
+    const sidebar = document.getElementById('sidebar');
+    const mainContent = document.getElementById('main-content');
+    const userProfile = document.getElementById('user-profile');
+    const profileDropdown = document.getElementById('profile-dropdown');
+    const updateProfileBtn = document.getElementById('update-profile-btn');
+    const profileModal = document.getElementById('profile-modal');
+    const closeModal = document.getElementById('close-modal');
+    const profileForm = document.getElementById('profile-form');
+    const profilePhoto = document.getElementById('profile-photo');
+    const profileImg = document.getElementById('profile-img');
+    const modalProfileImg = document.getElementById('modal-profile-img');
+    
+    // Default profile image (would be loaded from server in real app)
+    const defaultProfileImg = 'https://via.placeholder.com/150';
+    profileImg.src = defaultProfileImg;
+    modalProfileImg.src = defaultProfileImg;
+    
+    // Toggle Sidebar
+    toggleBtn.addEventListener('click', function() {
+      sidebar.classList.toggle('active');
+      mainContent.classList.toggle('sidebar-active');
+    });
+    
+    // Toggle Profile Dropdown
+    userProfile.addEventListener('click', function(e) {
+      e.stopPropagation();
+      profileDropdown.classList.toggle('active');
+    });
+    
+    // Close dropdown when clicking elsewhere
+    document.addEventListener('click', function() {
+      profileDropdown.classList.remove('active');
+    });
+    
+    // Open Profile Modal
+    updateProfileBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      profileModal.style.display = 'flex';
+      profileDropdown.classList.remove('active');
+    });
+    
+    // Close Profile Modal
+    closeModal.addEventListener('click', function() {
+      profileModal.style.display = 'none';
+    });
+    
+    // Handle Profile Photo Upload
+    profilePhoto.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          modalProfileImg.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+    
+    // Handle Form Submission
+    profileForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Get form values
+      const fullName = document.getElementById('full-name').value;
+      const email = document.getElementById('email').value;
+      const phone = document.getElementById('phone').value;
+      
+      // In a real app, you would send this data to the server
+      console.log('Updating profile:', { fullName, email, phone });
+      
+      // Update profile image if changed
+      if (profilePhoto.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          profileImg.src = event.target.result;
+          // In real app, upload image to server
+        };
+        reader.readAsDataURL(profilePhoto.files[0]);
+      }
+      
+      // Close modal
+      profileModal.style.display = 'none';
+      
+      // Show success message (in real app)
+      alert('Profile updated successfully!');
+    });
+    
+    // Responsive check
+    function checkResponsive() {
+      if (window.innerWidth < 992) {
+        sidebar.classList.remove('active');
+        mainContent.classList.remove('sidebar-active');
+      } else {
+        sidebar.classList.add('active');
+        mainContent.classList.add('sidebar-active');
+      }
+    }
+    
+    window.addEventListener('resize', checkResponsive);
+    checkResponsive();
+  });
+</script>
+</body>
+</html>

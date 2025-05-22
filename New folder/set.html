@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Taxi Dashboard – Settings Management</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    /* Reset & Base Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f6f9;
+      color: #333;
+      line-height: 1.6;
+    }
+    
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+    
+    /* Dashboard Layout */
+    .dashboard {
+      display: flex;
+      min-height: 100vh;
+      position: relative;
+    }
+    
+    /* Sidebar Styles */
+    .sidebar {
+      width: 240px;
+      background: #08090b;
+      color: #ecf0f1;
+      padding: 20px 0;
+      transition: all 0.3s ease;
+      position: fixed;
+      height: 100vh;
+      z-index: 100;
+    }
+    
+    .sidebar-header {
+      padding: 0 20px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .sidebar h2 {
+      font-size: 22px;
+      margin-bottom: 5px;
+    }
+    
+    .sidebar-menu {
+      padding: 20px;
+    }
+    
+    .sidebar ul {
+      list-style: none;
+    }
+    
+    .sidebar ul li {
+      margin: 12px 0;
+      position: relative;
+    }
+    
+    .sidebar ul li a {
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      border-radius: 5px;
+      transition: all 0.3s;
+    }
+    
+    .sidebar ul li a:hover,
+    .sidebar ul li a.active {
+      background: rgba(26, 188, 156, 0.2);
+      color: #1abc9c;
+    }
+    
+    .sidebar ul li a i {
+      margin-right: 10px;
+      width: 20px;
+      text-align: center;
+    }
+    
+    .submenu {
+      display: none;
+      padding-left: 20px;
+      margin-top: 5px;
+    }
+    
+    .sidebar ul li.active .submenu {
+      display: block;
+    }
+    
+    .submenu li {
+      margin: 8px 0;
+    }
+    
+    .submenu li a {
+      padding: 8px 10px;
+      font-size: 0.9em;
+    }
+    
+    /* Main Content Area */
+    .main-content {
+      flex: 1;
+      margin-left: 240px;
+      transition: all 0.3s ease;
+    }
+    
+    /* Top Navigation */
+    .topbar {
+      background: #ffffff;
+      padding: 15px 25px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    
+    .topbar-left {
+      display: flex;
+      align-items: center;
+    }
+    
+    .toggle-btn {
+      font-size: 22px;
+      cursor: pointer;
+      margin-right: 20px;
+      color: #555;
+    }
+    
+    .user-actions {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    
+    .notification-bell {
+      position: relative;
+      cursor: pointer;
+    }
+    
+    .notification-badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: #e74c3c;
+      color: white;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+    }
+    
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      position: relative;
+    }
+    
+    .user-avatar {
+      width: 35px;
+      height: 35px;
+      background: #1abc9c;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      overflow: hidden;
+    }
+    
+    .user-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    /* Content Container */
+    .content-container {
+      padding: 25px;
+    }
+    
+    .page-header {
+      margin-bottom: 25px;
+    }
+    
+    .page-header h1 {
+      font-size: 24px;
+      color: #2c3e50;
+    }
+    
+    /* Settings Section */
+    .settings-section {
+      background: white;
+      border-radius: 8px;
+      padding: 25px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .settings-section h3 {
+      margin-bottom: 20px;
+      color: #2c3e50;
+      font-size: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .settings-section form {
+      display: grid;
+      gap: 20px;
+    }
+    
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .form-group label {
+      font-weight: 500;
+      color: #555;
+    }
+    
+    .form-group input {
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 16px;
+      transition: all 0.3s;
+    }
+    
+    .form-group input:focus {
+      outline: none;
+      border-color: #1abc9c;
+      box-shadow: 0 0 0 3px rgba(26, 188, 156, 0.2);
+    }
+    
+    /* Profile Picture Upload */
+    .profile-upload {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .profile-preview {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 3px solid #eee;
+      position: relative;
+    }
+    
+    .profile-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .upload-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+    }
+    
+    .file-input-btn {
+      padding: 10px 15px;
+      background: #1abc9c;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+    
+    .file-input-btn:hover {
+      background: #16a085;
+    }
+    
+    .file-input {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+    
+    .remove-photo {
+      color: #e74c3c;
+      font-size: 14px;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    
+    /* Submit Button */
+    .submit-btn {
+      background: #1abc9c;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 500;
+      transition: all 0.3s;
+      margin-top: 10px;
+    }
+    
+    .submit-btn:hover {
+      background: #16a085;
+    }
+    
+    /* Responsive Styles */
+    @media (max-width: 992px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      
+      .sidebar.active {
+        transform: translateX(0);
+      }
+      
+      .main-content {
+        margin-left: 0;
+      }
+      
+      .main-content.sidebar-active {
+        margin-left: 240px;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .profile-upload {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .user-profile span {
+        display: none;
+      }
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+<div class="dashboard">
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2>Taxi Driver</h2>
+    </div>
+    
+    <nav class="sidebar-menu">
+      <ul>
+        <li>
+          <a href="dash.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        </li>
+        
+        <li>
+          <a href="#"><i class="fas fa-user-tie"></i> Driver Management</a>
+          <ul class="submenu">
+            <li><a href="#">Add Driver</a></li>
+            <li><a href="#">Driver List</a></li>
+            <li><a href="#">Driver History</a></li>
+          </ul>
+        </li>
+        
+        <li>
+          <a href="agency.html"><i class="fas fa-building"></i> Agency Management</a>
+          <ul class="submenu">
+            <li><a href="#">Add Agency</a></li>
+            <li><a href="#">Agency List</a></li>
+            <li><a href="#">Agency History</a></li>
+          </ul>
+        </li>
+        
+        <li>
+          <a href="order.html"><i class="fas fa-car"></i> Order Management</a>
+          <ul class="submenu">
+            <li><a href="#">New Order</a></li>
+            <li><a href="#">Active Orders</a></li>
+            <li><a href="#">Order History</a></li>
+          </ul>
+        </li>
+        
+        <li>
+          <a href="pay.html"><i class="fas fa-credit-card"></i> Payments</a>
+          <ul class="submenu">
+            <li><a href="#">Driver Payments</a></li>
+            <li><a href="#">Agency Payments</a></li>
+            <li><a href="#">Payment History</a></li>
+          </ul>
+        </li>
+        
+        <li>
+          <a href="reo.html"><i class="fas fa-chart-line"></i> Reports</a>
+        </li>
+        
+        <li class="active">
+          <a href="set.html"><i class="fas fa-cog"></i> Settings</a>
+        </li>
+        
+        <li>
+          <a href="login.html"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="main-content" id="main-content">
+    <!-- Top Navigation Bar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="toggle-btn" id="toggle-btn">
+          <i class="fas fa-bars"></i>
+        </button>
+        <h1>Settings Management</h1>
+      </div>
+      
+      <div class="user-actions">
+        <div class="notification-bell">
+          <i class="fas fa-bell"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        
+        <div class="user-profile">
+          <div class="user-avatar" id="current-avatar">
+            <img src="" alt="Profile" id="avatar-img">
+          </div>
+          <span>Vithu San</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Content Container -->
+    <div class="content-container">
+      <div class="settings-section">
+        <h3>Update Admin Profile</h3>
+        
+        <form id="admin-settings-form">
+          <!-- Profile Picture Upload -->
+          <div class="profile-upload">
+            <div class="profile-preview">
+              <img src="" alt="Profile Preview" id="profile-preview">
+            </div>
+            <div class="upload-controls">
+              <div class="file-input-wrapper">
+                <button type="button" class="file-input-btn">Choose Photo</button>
+                <input type="file" id="profile-photo" class="file-input" accept="image/*">
+              </div>
+              <span class="remove-photo" id="remove-photo">Remove Photo</span>
+            </div>
+          </div>
+          
+          <!-- Admin Information -->
+          <div class="form-group">
+            <label for="admin-name">Admin Name</label>
+            <input type="text" id="admin-name" placeholder="Enter admin name" value="Vithu San">
+          </div>
+          
+          <div class="form-group">
+            <label for="admin-email">Email Address</label>
+            <input type="email" id="admin-email" placeholder="Enter email" value="vithu@example.com">
+          </div>
+          
+          <div class="form-group">
+            <label for="admin-phone">Phone Number</label>
+            <input type="tel" id="admin-phone" placeholder="Enter phone number" value="+94 77 123 4567">
+          </div>
+          
+          <div class="form-group">
+            <label for="new-password">New Password</label>
+            <input type="password" id="new-password" placeholder="Enter new password">
+          </div>
+          
+          <div class="form-group">
+            <label for="confirm-password">Confirm Password</label>
+            <input type="password" id="confirm-password" placeholder="Confirm new password">
+          </div>
+          
+          <button type="submit" class="submit-btn">Save Settings</button>
+        </form>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- JavaScript -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // DOM Elements
+    const toggleBtn = document.getElementById('toggle-btn');
+    const sidebar = document.getElementById('sidebar');
+    const mainContent = document.getElementById('main-content');
+    const profilePhoto = document.getElementById('profile-photo');
+    const profilePreview = document.getElementById('profile-preview');
+    const removePhotoBtn = document.getElementById('remove-photo');
+    const adminForm = document.getElementById('admin-settings-form');
+    const avatarImg = document.getElementById('avatar-img');
+    
+    // Default profile image (would be loaded from server in real app)
+    const defaultProfileImg = 'https://via.placeholder.com/150';
+    profilePreview.src = defaultProfileImg;
+    avatarImg.src = defaultProfileImg;
+    
+    // Toggle Sidebar
+    toggleBtn.addEventListener('click', function() {
+      sidebar.classList.toggle('active');
+      mainContent.classList.toggle('sidebar-active');
+    });
+    
+    // Handle Profile Photo Upload
+    profilePhoto.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          profilePreview.src = event.target.result;
+          avatarImg.src = event.target.result; // Update avatar in topbar
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+    
+    // Handle Remove Photo
+    removePhotoBtn.addEventListener('click', function() {
+      profilePreview.src = defaultProfileImg;
+      avatarImg.src = defaultProfileImg;
+      profilePhoto.value = ''; // Clear file input
+    });
+    
+    // Handle Form Submission
+    adminForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Get form values
+      const adminName = document.getElementById('admin-name').value;
+      const adminEmail = document.getElementById('admin-email').value;
+      const adminPhone = document.getElementById('admin-phone').value;
+      const newPassword = document.getElementById('new-password').value;
+      const confirmPassword = document.getElementById('confirm-password').value;
+      
+      // Validate passwords match if provided
+      if (newPassword && newPassword !== confirmPassword) {
+        alert('Passwords do not match!');
+        return;
+      }
+      
+      // In a real app, you would send this data to the server
+      console.log('Updating admin profile:', { 
+        adminName, 
+        adminEmail, 
+        adminPhone,
+        passwordChanged: !!newPassword,
+        profilePhoto: profilePhoto.files[0] ? 'New photo uploaded' : 'No photo change'
+      });
+      
+      // Show success message
+      alert('Settings saved successfully!');
+      
+      // In a real app, you would handle the server response here
+    });
+    
+    // Responsive check
+    function checkResponsive() {
+      if (window.innerWidth < 992) {
+        sidebar.classList.remove('active');
+        mainContent.classList.remove('sidebar-active');
+      } else {
+        sidebar.classList.add('active');
+        mainContent.classList.add('sidebar-active');
+      }
+    }
+    
+    window.addEventListener('resize', checkResponsive);
+    checkResponsive();
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard - Taxi Management</title>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css">
+ 
+  <!-- Inline Modal Styles -->
+  <style>
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      width: 600px;
+      max-width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      position: relative;
+    }
+    .modal-content h3 {
+      margin-bottom: 20px;
+    }
+    .close {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 24px;
+      cursor: pointer;
+      color: #666;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .form-group input[type="file"] {
+      padding: 3px;
+    }
+    .form-group small {
+      color: #666;
+      font-size: 12px;
+    }
+    .modal-content button[type="submit"] {
+      background: black;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 10px;
+    }
+    .modal-content button[type="submit"]:hover {
+      background: #333;
+    }
+    .preview-container {
+      width: 100px;
+      height: 100px;
+      border: 1px dashed #ddd;
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #999;
+    }
+    .license-preview {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .license-preview img {
+      width: 80px;
+      height: 50px;
+      object-fit: cover;
+    }
+    .driver-list-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    .driver-list-table th,
+    .driver-list-table td {
+      padding: 12px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    .driver-list-table th {
+      background: #f5f5f5;
+      font-weight: 600;
+    }
+    .driver-list-table tr:nth-child(even) {
+      background: #f9f9f9;
+    }
+    .driver-list-table .action-btn {
+      background: #4CAF50;
+      color: white;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .driver-list-table .action-btn.delete {
+      background: #f44336;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="admin-panel">
+    <!-- Sidebar -->
+    <nav class="sidebar" aria-label="Main navigation">
+      <h2 id="sidebar-heading">Taxi Admin</h2>
+      <ul aria-labelledby="sidebar-heading">
+        <li class="active">
+          <a href="#"><i class="fa fa-tachometer-alt"></i> <span>Dashboard</span></a>
+        </li>
+        <li>
+          <a href="driver.html"><i class="fa fa-user-tie"></i> <span>Driver Management</span></a>
+          <ul class="submenu">
+            <li><a href="driver.html" onclick="showTab('addDriver')">Add Driver</a></li>
+            <li><a href="driver.html" onclick="showTab('driverList')">Driver List</a></li>
+            <li><a href="driver.html" onclick="showTab('driverHistory')">Driver History</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="agency.html"><i class="fa fa-building"></i> <span>Agency Management</span></a>
+          <ul class="submenu">
+            <li><a href="agency.html" onclick="showTab(event, 'addAgency')">Add Agency</a></li>
+            <li><a href="agency.html" onclick="showTab(event, 'agencyList')">Agency List</a></li>
+            <li><a href="agency.html" onclick="showTab(event, 'agencyHistory')">Agency History</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="order.html"><i class="fa fa-car"></i> <span>Order Management</span></a>
+          <ul class="submenu">
+            <li><a href="order.html" onclick="showTab(event, 'newOrderTab')">New Order</a></li>
+            <li><a href="order.html" onclick="showTab(event, 'activeOrdersTab')">Active Orders</a></li>
+            <li><a href="order.html" onclick="showTab(event, 'orderHistoryTab')">Order History</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="pay.html"><i class="fas fa-credit-card"></i> Payments</a>
+          <ul class="submenu">
+            <li><a href="pay.html" onclick="showTab('driver-payments')">Driver Payments</a></li>
+            <li><a href="pay.html" onclick="showTab('agency-payments')">Agency Payments</a></li>
+            <li><a href="pay.html" onclick="showTab('payment-history')">Payment History</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="reo.html"><i class="fa fa-chart-line"></i> <span>Reports</span></a>
+        </li>
+        <li>
+          <a href="set.html"><i class="fa fa-cog"></i> <span>Settings</span></a>
+        </li>
+        <li>
+          <a href="login.html"><i class="fa fa-sign-out-alt"></i> <span>Logout</span></a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Content -->
+    <main class="content">
+      <!-- Header -->
+      <div class="dashboard-header">
+        <h1>Dashboard Overview</h1>
+        <div class="user-actions">
+          <div class="notification-bell">
+            <i class="fa fa-bell"></i>
+            <span class="notification-badge">3</span>
+          </div>
+          <div class="user-profile">
+            <div class="user-avatar">VS</div>
+            <span>Vithu San</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="quick-actions">
+        <button class="action-btn" onclick="openModal('bookingModal')">
+          <i class="fa fa-plus"></i> New Booking
+        </button>
+        <button class="action-btn" onclick="openModal('driverModal')">
+          <i class="fa fa-user-plus"></i> Add Driver
+        </button>
+        <button class="action-btn" onclick="openModal('agencyModal')">
+          <i class="fa fa-building"></i> Add Agency
+        </button>
+        <button class="action-btn" onclick="openModal('reportModal')">
+          <i class="fa fa-file-invoice-dollar"></i> Generate Report
+        </button>
+      </div>
+
+      <!-- Booking Modal -->
+      <div id="bookingModal" class="modal">
+        <div class="modal-content">
+          <span class="close" onclick="closeModal('bookingModal')">×</span>
+           <h3>New Order</h3>
+      <form id="newOrderForm">
+        <div class="form-group">
+          <label for="customerName">Customer Name:</label>
+          <input type="text" id="customerName" placeholder="Enter customer name" required>
+        </div>
+        <div class="form-group">
+          <label for="pickupDate">Pickup Date:</label>
+          <input type="date" id="pickupDate" required>
+        </div>
+        <div class="form-group">
+          <label for="phoneNumber">Phone Number:</label>
+          <input type="tel" id="phoneNumber" placeholder="Enter phone number" required>
+        </div>
+        <div class="form-group">
+          <label for="email">Email Address:</label>
+          <input type="email" id="email" placeholder="Enter email address" required>
+        </div>
+        <div class="form-group">
+          <label for="serviceType">Service Type:</label>
+          <select id="serviceType" required>
+            <option value="Tour">Tour</option>
+            <option value="Wedding">Wedding</option>
+            <option value="Airport Service">Airport Service</option>
+            <option value="Local Distance">Local Distance</option>
+            <option value="Long Distance">Long Distance</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="vehicleType">Vehicle Type:</label>
+          <select id="vehicleType" required>
+            <option value="Car">Car</option>
+            <option value="Van">Van</option>
+            <option value="Bus">Bus</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="seats">Seats:</label>
+          <input type="number" id="seats" placeholder="Enter number of seats" required>
+        </div>
+        <div class="form-group">
+          <label for="pickupLocation">Pickup Location:</label>
+          <input type="text" id="pickupLocation" placeholder="Enter pickup location" required>
+        </div>
+        <div class="form-group">
+          <label for="dropoffLocation">Drop-off Location:</label>
+          <input type="text" id="dropoffLocation" placeholder="Enter drop-off location" required>
+        </div>
+        <div class="form-group">
+          <label for="routeType">Route:</label>
+          <select id="routeType" required>
+            <option value="">-- Select Route --</option>
+            <option value="One Way">One Way</option>
+            <option value="Return Way">Return Way</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="distance">Distance (km):</label>
+          <input type="text" id="distance" placeholder="Distance" readonly>
+        </div>
+        <div class="form-group">
+          <label for="fareAmount">Fare (Rs.):</label>
+          <input type="number" id="fareAmount" placeholder="Fare amount" readonly>
+        </div>
+        <div class="form-group">
+          <label>Involved:</label><br>
+          <input type="radio" id="agent" name="involved" value="Agent" onclick="toggleAgentDropdown(true)">
+          <label for="agent">Agent</label><br>
+          <input type="radio" id="none" name="involved" value="None" onclick="toggleAgentDropdown(false)" checked>
+          <label for="none">None</label>
+        </div>
+        <div class="form-group" id="agentDropdown" style="display: none;">
+          <label for="agentName">Select Agent Name:</label>
+          <select id="agentName">
+            <option value="">-- Select Agent --</option>
+            <!-- Populated dynamically -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Cash Payment Method:</label><br>
+          <input type="radio" id="driver" name="paymentMethod" value="Driver" required>
+          <label for="driver">Driver</label>
+          <input type="radio" id="company" name="paymentMethod" value="Company Direct">
+          <label for="company">Company Direct</label>
+          <input type="radio" id="agency" name="paymentMethod" value="Agency">
+          <label for="agency">Agency</label>
+        </div>
+        <button type="submit">Create Order</button>
+      </form>
+        </div>
+      </div>
+
+      <!-- Driver Modal -->
+      <div id="driverModal" class="modal">
+        <div class="modal-content">
+          <span class="close" onclick="closeModal('driverModal')">×</span>
+          <h3>Add New Driver</h3>
+          <form id="driverForm">
+            <div class="form-group">
+              <label for="driverName">Driver Name</label>
+              <input type="text" id="driverName" placeholder="Enter driver name" required>
+            </div>
+            <div class="form-group">
+              <label for="driverPhoto">Driver Photo</label>
+              <input type="file" id="driverPhoto" accept="image/*" required>
+              <div id="driverPhotoPreview" class="preview-container">Preview</div>
+            </div>
+            <div class="form-group">
+              <label for="licenseNumber">License Number</label>
+              <input type="text" id="licenseNumber" placeholder="Enter license number" required>
+            </div>
+            <div class="form-group">
+              <label for="licensePhoto">License (Both Sides)</label>
+              <input type="file" id="licensePhoto" accept="image/*" multiple required>
+              <small>Please upload both front and back sides (2 images)</small>
+              <div id="licensePhotoPreview" class="license-preview"></div>
+            </div>
+            <div class="form-group">
+              <label for="licenseExpiry">License Expiry Date</label>
+              <input type="date" id="licenseExpiry" required>
+            </div>
+            <div class="form-group">
+              <label for="phoneNumber">Phone Number</label>
+              <input type="tel" id="phoneNumber" placeholder="Enter phone number" required>
+            </div>
+            <div class="form-group">
+              <label for="email">Email Address</label>
+              <input type="email" id="email" placeholder="Enter email address" required>
+            </div>
+            <div class="form-group">
+              <label for="vehicleType">Vehicle Type</label>
+              <select id="vehicleType" required>
+                <option value="">Select vehicle type</option>
+                <option value="car">Car</option>
+                <option value="van">Van</option>
+                <option value="tuk">Tuk Tuk</option>
+                <option value="suv">SUV</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="vehicleNumber">Vehicle Number</label>
+              <input type="text" id="vehicleNumber" placeholder="Enter vehicle number" required>
+            </div>
+            <div class="form-group">
+              <label for="vehiclePhoto">Vehicle Photo</label>
+              <input type="file" id="vehiclePhoto" accept="image/*" required>
+              <div id="vehiclePhotoPreview" class="preview-container">Preview</div>
+            </div>
+            <div class="form-group">
+              <label for="insuranceExpiry">Insurance Expiry Date</label>
+              <input type="date" id="insuranceExpiry" required>
+            </div>
+            <button type="submit">Add Driver</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Edit Driver Modal -->
+      <div id="editDriverModal" class="modal">
+        <div class="modal-content">
+          <span class="close" onclick="closeModal('editDriverModal')">×</span>
+          <h3>Edit Driver</h3>
+          <form id="editDriverForm">
+            <input type="hidden" id="editDriverId">
+            <div class="form-group">
+              <label for="editDriverName">Driver Name</label>
+              <input type="text" id="editDriverName" placeholder="Enter driver name" required>
+            </div>
+            <div class="form-group">
+              <label for="editDriverPhoto">Driver Photo</label>
+              <input type="file" id="editDriverPhoto" accept="image/*">
+              <div id="editDriverPhotoPreview" class="preview-container">Preview</div>
+            </div>
+            <div class="form-group">
+              <label for="editLicenseNumber">License Number</label>
+              <input type="text" id="editLicenseNumber" placeholder="Enter license number" required>
+            </div>
+            <div class="form-group">
+              <label for="editLicensePhoto">License (Both Sides)</label>
+              <input type="file" id="editLicensePhoto" accept="image/*" multiple>
+              <small>Upload both front and back sides (2 images) or leave unchanged</small>
+              <div id="editLicensePhotoPreview" class="license-preview"></div>
+            </div>
+            <div class="form-group">
+              <label for="editLicenseExpiry">License Expiry Date</label>
+              <input type="date" id="editLicenseExpiry" required>
+            </div>
+            <div class="form-group">
+              <label for="editPhoneNumber">Phone Number</label>
+              <input type="tel" id="editPhoneNumber" placeholder="Enter phone number" required>
+            </div>
+            <div class="form-group">
+              <label for="editEmail">Email Address</label>
+              <input type="email" id="editEmail" placeholder="Enter email address" required>
+            </div>
+            <div class="form-group">
+              <label for="editVehicleType">Vehicle Type</label>
+              <select id="editVehicleType" required>
+                <option value="">Select vehicle type</option>
+                <option value="car">Car</option>
+                <option value="van">Van</option>
+                <option value="tuk">Tuk Tuk</option>
+                <option value="suv">SUV</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="editVehicleNumber">Vehicle Number</label>
+              <input type="text" id="editVehicleNumber" placeholder="Enter vehicle number" required>
+            </div>
+            <div class="form-group">
+              <label for="editVehiclePhoto">Vehicle Photo</label>
+              <input type="file" id="editVehiclePhoto" accept="image/*">
+              <div id="editVehiclePhotoPreview" class="preview-container">Preview</div>
+            </div>
+            <div class="form-group">
+              <label for="editInsuranceExpiry">Insurance Expiry Date</label>
+              <input type="date" id="editInsuranceExpiry" required>
+            </div>
+            <div class="form-group">
+              <label for="editStatus">Status</label>
+              <select id="editStatus" required>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+            <button type="submit">Save Changes</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Agency Modal -->
+      <div id="agencyModal" class="modal">
+        <div class="modal-content">
+          <span class="close" onclick="closeModal('agencyModal')">×</span>
+          <h3>Add New Agency</h3>
+          <form id="agencyForm">
+            <div class="form-group">
+              <label for="agencyName">Agency Name</label>
+              <input type="text" id="agencyName" placeholder="Enter agency name" required>
+            </div>
+            <div class="form-group">
+              <label for="owner">Owner Name</label>
+              <input type="text" id="owner" placeholder="Enter owner's name" required>
+            </div>
+            <div class="form-group">
+              <label for="phone">Contact Number</label>
+              <input type="text" id="phone" placeholder="Enter contact number" required>
+            </div>
+            <div class="form-group">
+              <label for="address">Address</label>
+              <input type="text" id="address" placeholder="Enter address" required>
+            </div>
+            <div class="form-group">
+              <label for="licenseNumber">NIC Number</label>
+              <input type="text" id="licenseNumber" placeholder="Enter NIC number" required>
+            </div>
+            <div class="form-group">
+              <label for="licenseNumber"> Commission %</label>
+              <input type="text" id="licenseNumber" placeholder="Enter Commission %" required>
+            </div>
+            <div class="form-group">
+              <label for="driverPhoto">Agency Photo</label>
+              <input type="file" id="driverPhoto" accept="image/*" required>
+            </div>
+            <div class="form-group">
+              <label for="licensePhoto">NIC (Both Sides)</label>
+              <input type="file" id="licensePhoto" accept="image/*" multiple required>
+              <small>Please upload both front and back sides (2 images)</small>
+            </div>
+            <button type="submit">Add Agency</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Report Modal -->
+      <div id="reportModal" class="modal">
+        <div class="modal-content">
+          <span class="close" onclick="closeModal('reportModal')">×</span>
+          <h3>Generate Report</h3>
+          <form id="reportForm">
+            <div class="form-group">
+              <label for="startDate">Start Date</label>
+              <input type="date" id="startDate" required>
+            </div>
+            <div class="form-group">
+              <label for="endDate">End Date</label>
+              <input type="date" id="endDate" required>
+            </div>
+            <button type="submit">Generate</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Summary Cards -->
+      <div class="dashboard-cards">
+        <div class="card">
+          <h3>Total Bookings</h3>
+          <div class="value">1,248</div>
+          <div class="change positive">
+            <i class="fa fa-arrow-up"></i> 12.5% from last week
+          </div>
+        </div>
+        <div class="card">
+          <h3>Active Drivers</h3>
+          <div class="value">86</div>
+          <div class="change positive">
+            <i class="fa fa-arrow-up"></i> 3.2% from last week
+          </div>
+        </div>
+        <div class="card">
+          <div class="value">24</div>
+          <div class="change positive">
+            <i class="fa fa-arrow-up"></i> 8.1% from last month
+          </div>
+        </div>
+        <div class="card">
+          <h3>Total Revenue</h3>
+          <div class="value">LKR 1.2M</div>
+          <div class="change positive">
+            <i class="fa fa-arrow-up"></i> 15.8% from last month
+          </div>
+        </div>
+        <div class="card">
+          <h3>Pending Jobs</h3>
+          <div class="value">18</div>
+          <div class="change negative">
+            <i class="fa fa-arrow-down"></i> 2.3% from yesterday
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Section -->
+      <div class="charts-container">
+        <div class="chart-card">
+          <h3>Weekly Bookings Trend</h3>
+          <div class="chart-container">
+            <canvas id="bookingsChart"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <h3>Revenue Breakdown</h3>
+          <div class="chart-container">
+            <canvas id="revenueChart"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <h3>Driver Performance</h3>
+          <div class="chart-container">
+            <canvas id="driverChart"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <h3>Job Status</h3>
+          <div class="chart-container">
+            <canvas id="statusChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Driver List -->
+      <div class="bg-white p-5 rounded-xl shadow-md mb-10">
+        <h2 class="text-xl font-semibold mb-4">Driver List</h2>
+        <table class="driver-list-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>License</th>
+              <th>Phone</th>
+              <th>Vehicle</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="driverTableBody">
+            <!-- Populated dynamically -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Recent Bookings Table -->
+      <div class="bg-white p-5 rounded-xl shadow-md mb-10">
+        <h2 class="text-xl font-semibold mb-4">Recent Bookings</h2>
+        <table class="min-w-full border">
+          <thead>
+            <tr class="bg-gray-200 text-left">
+              <th class="p-2">Booking ID</th>
+              <th class="p-2">Customer</th>
+              <th class="p-2">Driver</th>
+              <th class="p-2">Pickup</th>
+              <th class="p-2">Amount</th>
+              <th class="p-2">Status</th>
+              <th class="p-2">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-t">
+              <td class="p-2">#BK-1001</td>
+              <td class="p-2">John Doe</td>
+              <td class="p-2">Saman M.</td>
+              <td class="p-2">Colombo Fort</td>
+              <td class="p-2">LKR 1,250</td>
+              <td class="p-2 text-green-600 font-medium">Completed</td>
+              <td class="p-2">
+                <button class="assign-btn bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700" onclick="openAssignModal('BK-1001', 'John Doe', 'Colombo Fort')">View & Assign</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Assign Modal -->
+      <div id="assignModal" class="modal">
+        <div class="modal-content">
+          <span class="close" onclick="closeModal('assignModal')">×</span>
+          <h3>Assign Driver</h3>
+          <p><strong>Booking ID:</strong> <span id="modalBookingId"></span></p>
+          <p><strong>Customer:</strong> <span id="modalCustomerName"></span></p>
+          <p><strong>Pickup:</strong> <span id="modalPickupLocation"></span></p>
+          <div class="form-group">
+            <label for="assignDriverSelect">Select Driver:</label>
+            <select id="assignDriverSelect" class="w-full border px-3 py-2 rounded">
+              <option value="Saman M.">Saman M.</option>
+              <option value="Raj J.">Raj J.</option>
+              <option value="David P.">David P.</option>
+              <option value="Kumar W.">Kumar W.</option>
+            </select>
+          </div>
+          <div class="flex justify-end gap-2">
+            <button onclick="assignDriver()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Assign</button>
+            <button onclick="closeModal('assignModal')" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    // Mock driver data
+    let drivers = JSON.parse(localStorage.getItem('drivers')) || [
+      {
+        id: 'DL-123456',
+        name: 'Bala Kesu',
+        license: 'DL-123456',
+        phone: '0771234567',
+        email: 'bala.kesu@example.com',
+        vehicleType: 'car',
+        vehicleNumber: 'NP1234',
+        status: 'active',
+        licenseExpiry: '2025-12-31',
+        insuranceExpiry: '2025-06-30',
+        driverPhoto: 'https://via.placeholder.com/120',
+        licensePhotos: ['https://via.placeholder.com/150x100?text=License+Front', 'https://via.placeholder.com/150x100?text=License+Back'],
+        vehiclePhoto: 'https://via.placeholder.com/250x150?text=Vehicle+Photo'
+      },
+      {
+        id: 'DL-789012',
+        name: 'Dishanth Cehar',
+        license: 'DL-789012',
+        phone: '0777654321',
+        email: 'dishanth.cehar@example.com',
+        vehicleType: 'van',
+        vehicleNumber: 'NP5678',
+        status: 'active',
+        licenseExpiry: '2025-12-31',
+        insuranceExpiry: '2025-06-30',
+        driverPhoto: 'https://via.placeholder.com/120',
+        licensePhotos: ['https://via.placeholder.com/150x100?text=License+Front', 'https://via.placeholder.com/150x100?text=License+Back'],
+        vehiclePhoto: 'https://via.placeholder.com/250x150?text=Vehicle+Photo'
+      }
+    ];
+
+    // Modal management
+    const modalIds = ['bookingModal', 'driverModal', 'editDriverModal', 'agencyModal', 'reportModal', 'assignModal'];
+    function openModal(id) {
+      console.log(`Opening modal: ${id}`);
+      // Close all other modals
+      modalIds.forEach(modalId => {
+        if (modalId !== id) {
+          document.getElementById(modalId).style.display = 'none';
+        }
+      });
+      document.getElementById(id).style.display = 'block';
+    }
+
+    function closeModal(id) {
+      console.log(`Closing modal: ${id}`);
+      document.getElementById(id).style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+      modalIds.forEach(modalId => {
+        const modal = document.getElementById(modalId);
+        if (event.target === modal) {
+          closeModal(modalId);
+        }
+      });
+    };
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        modalIds.forEach(modalId => closeModal(modalId));
+      }
+    });
+
+    // Load drivers into table
+    function loadDrivers() {
+      const tbody = document.getElementById('driverTableBody');
+      tbody.innerHTML = '';
+      drivers.forEach(driver => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${driver.name}</td>
+          <td>${driver.license}</td>
+          <td>${driver.phone}</td>
+          <td>${driver.vehicleType} - ${driver.vehicleNumber}</td>
+          <td>${driver.status.charAt(0).toUpperCase() + driver.status.slice(1)}</td>
+          <td>
+            <button class="action-btn edit-btn" onclick="editDriver('${driver.id}')">Edit</button>
+            <button class="action-btn delete" onclick="deleteDriver('${driver.id}')">Delete</button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    // Add Driver Form submission
+    document.getElementById('driverForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const licensePhotos = document.getElementById('licensePhoto').files;
+      const email = document.getElementById('email').value;
+      const phone = document.getElementById('phoneNumber').value;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const phoneRegex = /^\d{10}$/;
+
+      if (licensePhotos.length !== 2) {
+        alert('Please upload exactly 2 license photos (front and back).');
+        return;
+      }
+      if (!emailRegex.test(email)) {
+        alert('Please enter a valid email address.');
+        return;
+      }
+      if (!phoneRegex.test(phone)) {
+        alert('Please enter a valid 10-digit phone number.');
+        return;
+      }
+
+      const newDriver = {
+        id: document.getElementById('licenseNumber').value,
+        name: document.getElementById('driverName').value,
+        license: document.getElementById('licenseNumber').value,
+        phone: document.getElementById('phoneNumber').value,
+        email: document.getElementById('email').value,
+        vehicleType: document.getElementById('vehicleType').value,
+        vehicleNumber: document.getElementById('vehicleNumber').value,
+        status: 'active',
+        licenseExpiry: document.getElementById('licenseExpiry').value,
+        insuranceExpiry: document.getElementById('insuranceExpiry').value,
+        driverPhoto: document.getElementById('driverPhotoPreview').querySelector('img')?.src || 'https://via.placeholder.com/120',
+        licensePhotos: Array.from(licensePhotos).map((_, i) => `https://via.placeholder.com/150x100?text=License+${i+1}`),
+        vehiclePhoto: document.getElementById('vehiclePhotoPreview').querySelector('img')?.src || 'https://via.placeholder.com/250x150?text=Vehicle+Photo'
+      };
+      drivers.push(newDriver);
+      localStorage.setItem('drivers', JSON.stringify(drivers));
+      alert('Driver added successfully!');
+      this.reset();
+      document.getElementById('driverPhotoPreview').innerHTML = 'Preview';
+      document.getElementById('licensePhotoPreview').innerHTML = '';
+      document.getElementById('vehiclePhotoPreview').innerHTML = 'Preview';
+      closeModal('driverModal');
+      loadDrivers();
+    });
+
+    // File preview for Add Driver Form
+    document.getElementById('driverPhoto').addEventListener('change', function(e) {
+      if (e.target.files.length > 0) {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          document.getElementById('driverPhotoPreview').innerHTML = `<img src="${event.target.result}" style="width: 100%; height: 100%; object-fit: cover;" alt="Driver photo preview">`;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    document.getElementById('licensePhoto').addEventListener('change', function(e) {
+      if (e.target.files.length > 0) {
+        document.getElementById('licensePhotoPreview').innerHTML = '';
+        Array.from(e.target.files).forEach((file, index) => {
+          const reader = new FileReader();
+          reader.onload = function(event) {
+            const img = document.createElement('img');
+            img.src = event.target.result;
+            img.alt = `License photo ${index + 1} preview`;
+            document.getElementById('licensePhotoPreview').appendChild(img);
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+    });
+
+    document.getElementById('vehiclePhoto').addEventListener('change', function(e) {
+      if (e.target.files.length > 0) {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          document.getElementById('vehiclePhotoPreview').innerHTML = `<img src="${event.target.result}" style="width: 100%; height: 100%; object-fit: cover;" alt="Vehicle photo preview">`;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Edit Driver
+    function editDriver(driverId) {
+      const driver = drivers.find(d => d.id === driverId);
+      if (!driver) {
+        alert('Driver not found.');
+        return;
+      }
+      document.getElementById('editDriverId').value = driver.id;
+      document.getElementById('editDriverName').value = driver.name;
+      document.getElementById('editLicenseNumber').value = driver.license;
+      document.getElementById('editPhoneNumber').value = driver.phone;
+      document.getElementById('editEmail').value = driver.email;
+      document.getElementById('editVehicleType').value = driver.vehicleType;
+      document.getElementById('editVehicleNumber').value = driver.vehicleNumber;
+      document.getElementById('editLicenseExpiry').value = driver.licenseExpiry;
+      document.getElementById('editInsuranceExpiry').value = driver.insuranceExpiry;
+      document.getElementById('editStatus').value = driver.status;
+      document.getElementById('editDriverPhotoPreview').innerHTML = `<img src="${driver.driverPhoto}" style="width: 100%; height: 100%; object-fit: cover;" alt="Driver photo preview">`;
+      document.getElementById('editLicensePhotoPreview').innerHTML = driver.licensePhotos.map((photo, i) => `<img src="${photo}" alt="License photo ${i+1} preview">`).join('');
+      document.getElementById('editVehiclePhotoPreview').innerHTML = `<img src="${driver.vehiclePhoto}" style="width: 100%; height: 100%; object-fit: cover;" alt="Vehicle photo preview">`;
+      openModal('editDriverModal');
+    }
+
+    // File preview for Edit Driver Form
+    document.getElementById('editDriverPhoto').addEventListener('change', function(e) {
+      if (e.target.files.length > 0) {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          document.getElementById('editDriverPhotoPreview').innerHTML = `<img src="${event.target.result}" style="width: 100%; height: 100%; object-fit: cover;" alt="Driver photo preview">`;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    document.getElementById('editLicensePhoto').addEventListener('change', function(e) {
+      if (e.target.files.length > 0) {
+        document.getElementById('editLicensePhotoPreview').innerHTML = '';
+        Array.from(e.target.files).forEach((file, index) => {
+          const reader = new FileReader();
+          reader.onload = function(event) {
+            const img = document.createElement('img');
+            img.src = event.target.result;
+            img.alt = `License photo ${index + 1} preview`;
+            document.getElementById('editLicensePhotoPreview').appendChild(img);
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+    });
+
+    document.getElementById('editVehiclePhoto').addEventListener('change', function(e) {
+      if (e.target.files.length > 0) {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          document.getElementById('editVehiclePhotoPreview').innerHTML = `<img src="${event.target.result}" style="width: 100%; height: 100%; object-fit: cover;" alt="Vehicle photo preview">`;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Edit Driver Form submission
+    document.getElementById('editDriverForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const licensePhotos = document.getElementById('editLicensePhoto').files;
+      const email = document.getElementById('editEmail').value;
+      const phone = document.getElementById('editPhoneNumber').value;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const phoneRegex = /^\d{10}$/;
+
+      if (licensePhotos.length > 0 && licensePhotos.length !== 2) {
+        alert('Please upload exactly 2 license photos (front and back) or leave unchanged.');
+        return;
+      }
+      if (!emailRegex.test(email)) {
+        alert('Please enter a valid email address.');
+        return;
+      }
+      if (!phoneRegex.test(phone)) {
+        alert('Please enter a valid 10-digit phone number.');
+        return;
+      }
+
+      const driverId = document.getElementById('editDriverId').value;
+      const driverIndex = drivers.findIndex(d => d.id === driverId);
+      if (driverIndex !== -1) {
+        drivers[driverIndex] = {
+          ...drivers[driverIndex],
+          name: document.getElementById('editDriverName').value,
+          license: document.getElementById('editLicenseNumber').value,
+          phone: document.getElementById('editPhoneNumber').value,
+          email: document.getElementById('editEmail').value,
+          vehicleType: document.getElementById('editVehicleType').value,
+          vehicleNumber: document.getElementById('editVehicleNumber').value,
+          status: document.getElementById('editStatus').value,
+          licenseExpiry: document.getElementById('editLicenseExpiry').value,
+          insuranceExpiry: document.getElementById('editInsuranceExpiry').value,
+          driverPhoto: document.getElementById('editDriverPhotoPreview').querySelector('img')?.src || drivers[driverIndex].driverPhoto,
+          licensePhotos: licensePhotos.length === 2 ? Array.from(licensePhotos).map((_, i) => `https://via.placeholder.com/150x100?text=License+${i+1}`) : drivers[driverIndex].licensePhotos,
+          vehiclePhoto: document.getElementById('editVehiclePhotoPreview').querySelector('img')?.src || drivers[driverIndex].vehiclePhoto
+        };
+        localStorage.setItem('drivers', JSON.stringify(drivers));
+        alert('Driver details updated successfully!');
+        closeModal('editDriverModal');
+        loadDrivers();
+      }
+    });
+
+    // Delete Driver
+    function deleteDriver(driverId) {
+      if (confirm('Are you sure you want to delete this driver?')) {
+        drivers = drivers.filter(d => d.id !== driverId);
+        localStorage.setItem('drivers', JSON.stringify(drivers));
+        alert('Driver deleted successfully!');
+        loadDrivers();
+      }
+    }
+
+    // Assign Modal Functions
+    function openAssignModal(bookingId, customer, pickup) {
+      console.log(`Opening assign modal for booking: ${bookingId}`);
+      document.getElementById('modalBookingId').innerText = bookingId;
+      document.getElementById('modalCustomerName').innerText = customer;
+      document.getElementById('modalPickupLocation').innerText = pickup;
+      openModal('assignModal');
+    }
+
+    function assignDriver() {
+      const driver = document.getElementById('assignDriverSelect').value;
+      alert("Driver '" + driver + "' assigned successfully!");
+      closeModal('assignModal');
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+      loadDrivers();
+
+      // Prevent unintended modal triggers
+      document.querySelectorAll('.assign-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation(); // Prevent parent click events
+        });
+      });
+
+      // Bookings Trend Chart
+      const bookingsCtx = document.getElementById('bookingsChart').getContext('2d');
+      new Chart(bookingsCtx, {
+        type: 'line',
+        data: {
+          labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+          datasets: [{
+            label: 'Bookings',
+            data: [120, 145, 178, 210, 195, 230, 280],
+            backgroundColor: 'rgba(79, 195, 247, 0.2)',
+            borderColor: '#4fc3f7',
+            borderWidth: 2,
+            tension: 0.4,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, grid: { display: false } },
+            x: { grid: { display: false } }
+          }
+        }
+      });
+
+      // Revenue Breakdown Chart
+      const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+      new Chart(revenueCtx, {
+        type: 'bar',
+        data: {
+          labels: ['Standard', 'Premium', 'VIP', 'Airport', 'Long Distance'],
+          datasets: [{
+            label: 'Revenue (LKR)',
+            data: [450000, 320000, 280000, 150000, 50000],
+            backgroundColor: [
+              'rgba(79, 195, 247, 0.7)',
+              'rgba(76, 175, 80, 0.7)',
+              'rgba(156, 39, 176, 0.7)',
+              'rgba(255, 152, 0, 0.7)',
+              'rgba(244, 67, 54, 0.7)'
+            ],
+            borderColor: [
+              '#4fc3f7',
+              '#4caf50',
+              '#9c27b0',
+              '#ff9800',
+              '#f44336'
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, grid: { display: false } },
+            x: { grid: { display: false } }
+          }
+        }
+      });
+
+      // Driver Performance Chart
+      const driverCtx = document.getElementById('driverChart').getContext('2d');
+      new Chart(driverCtx, {
+        type: 'radar',
+        data: {
+          labels: ['Completed Jobs', 'Earnings', 'Customer Rating', 'Response Time', 'Availability'],
+          datasets: [
+            {
+              label: 'Top Driver',
+              data: [48, 95, 98, 90, 85],
+              backgroundColor: 'rgba(79, 195, 247, 0.2)',
+              borderColor: '#4fc3f7',
+              borderWidth: 2,
+              pointBackgroundColor: '#4fc3f7'
+            },
+            {
+              label: 'Average',
+              data: [32, 65, 82, 70, 75],
+              backgroundColor: 'rgba(76, 175, 80, 0.2)',
+              borderColor: '#4caf50',
+              borderWidth: 2,
+              pointBackgroundColor: '#4caf50'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'top' } },
+          scales: {
+            r: { angleLines: { display: true }, suggestedMin: 0, suggestedMax: 100 }
+          }
+        }
+      });
+
+      // Job Status Chart
+      const statusCtx = document.getElementById('statusChart').getContext('2d');
+      new Chart(statusCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Completed', 'In Progress', 'Canceled', 'Scheduled'],
+          datasets: [{
+            data: [65, 15, 10, 10],
+            backgroundColor: ['#4caf50', '#2196f3', '#f44336', '#ff9800'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom' } },
+          cutout: '70%'
+        }
+      });
+
+      // Menu active state management
+      document.querySelectorAll('.sidebar li').forEach(item => {
+        item.addEventListener('click', function() {
+          document.querySelectorAll('.sidebar li').forEach(i => i.classList.remove('active'));
+          this.classList.add('active');
+          if (this.querySelector('.submenu')) {
+            document.querySelectorAll('.submenu').forEach(menu => {
+              if (menu !== this.querySelector('.submenu')) {
+                menu.style.display = 'none';
+              }
+            });
+          }
+        });
+      });
+
+      // Simulate notification update
+      setTimeout(() => {
+        document.querySelector('.notification-badge').textContent = '5';
+      }, 2000);
+    });
+
+    // Mock API for dashboard data
+    async function fetchDashboardData() {
+      try {
+        const mockData = {
+          bookings: 1248,
+          drivers: 86,
+          agencies: 24,
+          revenue: 1200000,
+          pendingJobs: 18
+        };
+        return mockData;
+      } catch (error) {
+        console.error('Error loading dashboard data:', error);
+        return null;
+      }
+    }
+
+    fetchDashboardData().then(data => {
+      if (data) {
+        console.log('Dashboard data loaded:', data);
+      }
+    });
+  </script>
+</body>
+</html>
